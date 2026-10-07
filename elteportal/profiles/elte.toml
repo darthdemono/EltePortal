@@ -1,0 +1,150 @@
+schema_version = 1
+name = "ELTE"
+
+[canvas]
+enabled = true
+base_url = "https://canvas.elte.hu/api/v1"
+
+[neptun]
+enabled = true
+flow = "elte-portal"
+portal_url = "https://neptun.elte.hu"
+api_url = "https://hallgato1.neptun.elte.hu/api"
+lcid = 1033
+student_host_suffix = "neptun.elte.hu"
+
+[neptun.endpoints]
+authenticate = "Account/Authenticate"
+refresh = "Account/GetNewTokens"
+outer_login = "Account/OuterLogin"
+environment = "General/EnvironmentData"
+userinfo = "UserInfo"
+trainings = "MyTrainings"
+calendar_events = "Calendar/GetCalendarEvents"
+calendar_trainings = "Calendar/GetStudentTrainings"
+calendar_links = "Calendar/GetLinksForCalendarExport"
+course_terms = "SubjectCourse/GetTerms"
+courses = "SubjectCourse/GetSubjectCourseList"
+averages = "Advancement/GetTermAveragesByTraining"
+credits = "advancement/creditprogress"
+curriculum_templates = "Advancement/GetStudentCurriculumTemplates"
+completable_subjects = "Curriculum/GetCompletableCurriculumSubjects"
+optional_summary = "Curriculum/GetOptionalSubjectsSummary"
+semesters = "administration/semiannualregistration/semesters"
+exam_terms = "ExamResults/GetTermsForGetExamResultsList"
+exam_results = "ExamResults/GetExamResultsList"
+exams_registered = "ExamRegisteredExams/GetRegisteredExamsList"
+exams_available = "ExamRegistration/GetExamsList"
+invoices = "Invoices/GetInvoicesForStudent"
+collective_invoices = "FinancialDataDashboard/GetCollectiveInvoices"
+to_pay = "FinancialItem/GetItemsToBePayed"
+scholarships = "Scholarship/GetScholarshipPayments"
+scholarship_terms = "Scholarship/GetScholarshipAvailablePaymentTerms"
+dormitory = "Dormitory/GetDormitoryDashboardPeriodsData"
+messages_mandatory = "Messages/Mandatories"
+unread_count = "Message/GetUnreadedMessagesCount"
+tasks = "Tasks/GetDashboardTasksData"
+requests = "RequestForm/GetNumberOfRequestForms"
+publications = "Publication/GetPublications"
+queries = "Queries/GetQueriesListData"
+fir = "FIR/GetStudentFIRData"
+taken_terms = "TakenSubjects/Terms"
+taken_subjects = "TakenSubjects/GetTakenSubjects"
+registry_terms = "RegistrySheet/GetStudentTrainingTerms"
+grades = "RegistrySheet/GetStudentTakenSubjectsByTerm"
+
+[timetable]
+enabled = true
+url = "https://tanrend.elte.hu/tanrendnavigation.php"
+
+[files]
+wornox = "https://wornox.web.elte.hu/Materials/"
+webprog = "http://webprogramozas.inf.elte.hu"
+
+[sites]
+
+[[sites.entries]]
+key = 'canvas'
+url = 'https://canvas.elte.hu'
+auth = 'canvas-token'
+what = 'Canvas LMS.'
+
+[[sites.entries]]
+key = 'neptun'
+url = 'https://neptun.elte.hu'
+auth = 'neptun+totp'
+what = 'Neptun student portal.'
+
+[[sites.entries]]
+key = 'tanrend'
+url = 'https://tanrend.elte.hu'
+what = 'Public timetable.'
+
+[[sites.entries]]
+key = 'orarend'
+url = 'https://elte-orarend.vercel.app'
+what = 'Timetable planner.'
+
+[[sites.entries]]
+key = 'wornox'
+url = 'https://wornox.web.elte.hu/Materials/'
+what = 'Open course file server.'
+
+[[sites.entries]]
+key = 'webprog'
+url = 'http://webprogramozas.inf.elte.hu'
+what = 'Web programming department site.'
+
+[[sites.entries]]
+key = 'progenv'
+url = 'https://progenv.inf.elte.hu'
+auth = 'inf-account'
+what = 'Web programming task and evaluation system.'
+
+[[sites.entries]]
+key = 'tms'
+url = 'https://tms.inf.elte.hu'
+auth = 'inf-account'
+what = 'Coding-test system used by Programming.'
+
+[[sites.entries]]
+key = 'panopto'
+url = 'https://elte.cloud.panopto.eu'
+auth = 'elte-sso'
+what = 'Lecture recording service.'
+
+[[sites.entries]]
+key = 'asvanyi'
+url = 'http://aszt.inf.elte.hu/~asvanyi/'
+what = 'Course material site.'
+
+[[sites.entries]]
+key = 'animations'
+url = 'https://people.inf.elte.hu/pgm6rw/algo/index.html'
+what = 'Interactive algorithm material.'
+
+[[sites.entries]]
+key = 'csbsc'
+url = 'https://csbsc.elte.hu'
+what = 'Computer Science BSc programme site.'
+
+[[sites.entries]]
+key = 'iig'
+url = 'https://iig.elte.hu'
+what = 'IT directorate.'
+
+[[sites.entries]]
+key = 'vpn'
+url = 'https://vpn.elte.hu'
+auth = 'elte-sso'
+what = 'University VPN.'
+
+[[sites.entries]]
+key = 'tamop-algo'
+url = 'https://tamop412.elte.hu/tananyagok/algoritmusok/index.html'
+what = 'Online algorithms textbook.'
+
+[[sites.entries]]
+key = 'forstudents'
+url = 'https://www.inf.elte.hu/forstudents'
+what = 'Faculty student pages.'

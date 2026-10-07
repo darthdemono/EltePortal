@@ -1,0 +1,20 @@
+schema_version = 1
+name = "Example University"
+
+[canvas]
+enabled = true
+base_url = "https://canvas.example.edu/api/v1"
+
+[neptun]
+enabled = false
+flow = "unsupported"
+
+[neptun.endpoints]
+
+[timetable]
+enabled = false
+
+[files]
+
+[sites]
+entries = [{key = "canvas", url = "https://canvas.example.edu", auth = "canvas-token", what = "Course resources"}]

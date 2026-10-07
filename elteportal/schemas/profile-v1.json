@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EltePortal institution profile v1",
+  "type": "object",
+  "required": ["schema_version", "name", "canvas", "neptun", "timetable", "files", "sites"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "name": {"type": "string", "minLength": 1},
+    "canvas": {"type": "object", "properties": {"enabled": {"type": "boolean"}, "base_url": {"type": "string"}}},
+    "neptun": {"type": "object", "properties": {"enabled": {"type": "boolean"}, "flow": {"enum": ["elte-portal", "unsupported"]}, "portal_url": {"type": "string"}, "api_url": {"type": "string"}, "lcid": {"type": "integer"}, "student_host_suffix": {"type": "string"}, "endpoints": {"type": "object", "additionalProperties": {"type": "string"}}}},
+    "timetable": {"type": "object", "properties": {"enabled": {"type": "boolean"}, "url": {"type": "string"}}},
+    "files": {"type": "object", "additionalProperties": {"type": "string"}},
+    "sites": {"type": "object", "properties": {"entries": {"type": "array", "items": {"type": "object", "required": ["key", "url"], "properties": {"key": {"type": "string"}, "url": {"type": "string"}, "auth": {"type": "string"}, "what": {"type": "string"}}}}}}
+  }
+}
