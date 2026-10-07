@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EltePortal output envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ok", "command", "data", "warnings"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "ok": {"type": "boolean"},
+    "command": {"type": "string"},
+    "data": {},
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "error": {"type": "string"}
+  },
+  "allOf": [{"if": {"properties": {"ok": {"const": false}}}, "then": {"required": ["error"]}}]
+}
