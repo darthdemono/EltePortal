@@ -1,0 +1,48 @@
+[project]
+name = "elteportal"
+version = "1.0.0"
+description = "Read-mostly CLI and library for Canvas, Neptun, timetables, and open course files."
+requires-python = ">=3.11"
+dependencies = []
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{name = "Jubair Hasan"}]
+classifiers = ["Programming Language :: Python :: 3", "Operating System :: OS Independent"]
+
+[project.optional-dependencies]
+keyring = ["keyring>=25"]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.10", "build>=1"]
+
+[project.entry-points."elteportal.providers"]
+canvas = "elteportal.providers:CanvasProvider"
+neptun = "elteportal.providers:NeptunProvider"
+timetable = "elteportal.providers:TimetableProvider"
+files = "elteportal.providers:FilesProvider"
+sites = "elteportal.providers:SitesProvider"
+config = "elteportal.providers:ConfigProvider"
+
+[project.scripts]
+elte = "elteportal.cli:main"
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["elteportal*"]
+
+[tool.setuptools.package-data]
+elteportal = ["py.typed", "profiles/*.toml", "schemas/*.json"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = false

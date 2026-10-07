@@ -1,0 +1,19 @@
+__pycache__/
+*.egg-info/
+.venv/
+dist/
+build/
+reference/
+Research/
+Reports/
+Handoff/
+.pytest_cache/
+
+# Local LLM assistant instructions and state
+.claude/
+.codex/
+.gemini/
+AGENTS*.md
+CLAUDE*.md
+CODEX*.md
+GEMINI*.md
