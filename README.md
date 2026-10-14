@@ -68,6 +68,102 @@ After you configure a Canvas token, these are the sort of commands you will use:
 
 The bundled [ELTE profile](elteportal/profiles/elte.toml) is a reference. To add another institution, copy [the minimal example](examples/university.toml), edit its URLs and enabled providers, then run `elte --profile <PATH-TO-PROFILE> --json config check`. This requires no Python for Canvas or sites with the supported formats. A different timetable layout or Neptun login flow needs a provider plugin; a profile must say `flow = "unsupported"` until that implementation is tested. The ELTE Neptun flow is preserved from local observations and has not been publicly verified at other universities. See the [profile reference](docs/profiles.md) and [Neptun notes](docs/neptun.md).
 
+## Everything it can do
+
+Every command below takes `--json`. Canvas commands need `CANVAS_API_KEY`, Neptun commands need a cached login, and the timetable, the open file servers and `sites` need nothing at all.
+
+### Canvas
+
+Canvas access is GET only. The single exception is `canvas nickname`, which does nothing until you add `--apply`.
+
+| Command | What you get |
+| --- | --- |
+| `elte canvas courses [--term TEXT]` | Every course the account can see, concluded ones included, once each, newest term first: id, code, name, original name, start date. `--term` matches a substring of the name, the original name or the course code, so a nicknamed course still answers to its term. |
+| `elte canvas files <COURSE>` | The course's files with id, name and size, plus a total. Signed download links are redacted in JSON and the command says so in a warning. |
+| `elte canvas pull <COURSE> --into <DIR>` | Downloads the course's files. Files already in the folder are skipped unless you add `--force`. `--skip-images` leaves out png, jpg and jpeg. |
+| `elte canvas links [--course <ID>]` | Every non-Canvas URL a course links out to, found in the syllabus, pages, assignment descriptions, announcements and external-URL module items, each with where it was found, and a count per host. Leave out `--course` to sweep every course. This is how you find the Panopto recordings and department sites that nothing advertises. |
+| `elte canvas upcoming` | Upcoming events for the account: title, date, link. |
+| `elte canvas archive --account <ACCOUNT> --into <DIR> [--workers N]` | A local copy of the whole account, four courses at a time by default. Per course it writes the course record, files (downloaded), people, modules, external tools, discussions with each thread, pages with each page body, assignments with your submissions, quizzes with their questions and your submissions, and an `errors.json` for whatever Canvas refused. Per account it writes your profile, enrolments, and the inbox, sent and archived conversations. Reading the inbox does not mark anything as read. It writes `archive-status.json` as it goes and skips files it already has, so a second run picks up where the first stopped. |
+| `elte canvas nickname --archive <DIR> [--apply]` | Compares your Canvas course nicknames with English, term-qualified ones derived from an archive. With `--apply` it sets them. This is the only write the tool can make. |
+| `elte reports missing` | Writes `Canvas - Missing Work.md`: everything not yet handed in across your active courses, split into overdue and still due, with what each item is worth. |
+| `elte reports grades` | Writes `Canvas - Grades.md`: your running score per course, with the current score (graded work only) next to the final score (ungraded work counted as zero). It never turns a percentage into a 1 to 5 grade, because Canvas carries no such mapping. |
+
+Both reports rewrite their file on every run, in `$env:ELTE_REPORT_DIR` or `~/.local/share/elteportal/reports`.
+
+### Neptun
+
+The tool reads exactly the 35 endpoints named in `[neptun.endpoints]` in `elteportal/profiles/elte.toml`. You call each one with `elte neptun get <name>`, and it sends a GET request with your cached login token. If the server answers 401 the token is refreshed once and the call repeated. A second failure stops there.
+
+| Command | What it does |
+| --- | --- |
+| `elte neptun creds` | Checks that your username, password and TOTP seed resolve, and whether a token is cached. No request goes to Neptun. |
+| `elte neptun code` | Checks that a TOTP code can be generated and how many seconds it has left. The code is never printed. |
+| `elte neptun probe` | Asks every endpoint whether it exists, without credentials. A 401 or a redirect to the login page counts as "exists, wants auth". |
+| `elte neptun login` | Logs in once through the portal and caches the token in a 0600 file. `--code` overrides the TOTP code, `--guid` accepts a hand-off GUID or the whole `outerlogin?GUID=` URL copied from a browser, `--wait <SECONDS>` keeps asking for the hand-off while the student web reports itself full (no extra login attempts), and `--api` tries the API's own login, which ELTE answers with a redirect. |
+| `elte neptun logout` | Drops the cached token. |
+| `elte neptun get <name> [--param KEY=VALUE]` | Reads one of the endpoints below. `--param` is repeatable and overrides the paging defaults the list endpoints (exam results, invoices, scholarships, publications and a few more) ask for. |
+
+| Name | Neptun API path | What it is |
+| --- | --- | --- |
+| `environment` | `General/EnvironmentData` | Portal environment data |
+| `userinfo` | `UserInfo` | Your user and student info |
+| `trainings` | `MyTrainings` | Your programmes |
+| `calendar_events` | `Calendar/GetCalendarEvents` | Calendar events |
+| `calendar_trainings` | `Calendar/GetStudentTrainings` | Programmes, for the calendar view |
+| `calendar_links` | `Calendar/GetLinksForCalendarExport` | Calendar export links (fetched, but the output is redacted) |
+| `course_terms` | `SubjectCourse/GetTerms` | Terms you can browse courses for |
+| `courses` | `SubjectCourse/GetSubjectCourseList` | Subject and course list |
+| `averages` | `Advancement/GetTermAveragesByTraining` | Grade averages per term |
+| `credits` | `advancement/creditprogress` | Credit progress |
+| `curriculum_templates` | `Advancement/GetStudentCurriculumTemplates` | Curriculum templates |
+| `completable_subjects` | `Curriculum/GetCompletableCurriculumSubjects` | Subjects you can still complete |
+| `optional_summary` | `Curriculum/GetOptionalSubjectsSummary` | Elective subjects summary |
+| `semesters` | `administration/semiannualregistration/semesters` | Semester registration status |
+| `exam_terms` | `ExamResults/GetTermsForGetExamResultsList` | Terms that have exam results |
+| `exam_results` | `ExamResults/GetExamResultsList` | Exam results |
+| `exams_registered` | `ExamRegisteredExams/GetRegisteredExamsList` | Exams you are registered for |
+| `exams_available` | `ExamRegistration/GetExamsList` | Exams open for registration |
+| `invoices` | `Invoices/GetInvoicesForStudent` | Invoices |
+| `collective_invoices` | `FinancialDataDashboard/GetCollectiveInvoices` | Collective invoices |
+| `to_pay` | `FinancialItem/GetItemsToBePayed` | Items still to pay |
+| `scholarships` | `Scholarship/GetScholarshipPayments` | Scholarship payments |
+| `scholarship_terms` | `Scholarship/GetScholarshipAvailablePaymentTerms` | Scholarship payment terms |
+| `dormitory` | `Dormitory/GetDormitoryDashboardPeriodsData` | Dormitory periods |
+| `messages_mandatory` | `Messages/Mandatories` | Messages you must read |
+| `unread_count` | `Message/GetUnreadedMessagesCount` | Unread message count |
+| `tasks` | `Tasks/GetDashboardTasksData` | Dashboard tasks |
+| `requests` | `RequestForm/GetNumberOfRequestForms` | Number of request forms |
+| `publications` | `Publication/GetPublications` | Publications |
+| `queries` | `Queries/GetQueriesListData` | Queries list |
+| `fir` | `FIR/GetStudentFIRData` | Your FIR data |
+| `taken_terms` | `TakenSubjects/Terms` | Terms with taken subjects |
+| `taken_subjects` | `TakenSubjects/GetTakenSubjects` | Subjects you have taken |
+| `registry_terms` | `RegistrySheet/GetStudentTrainingTerms` | Terms on your registry sheet |
+| `grades` | `RegistrySheet/GetStudentTakenSubjectsByTerm` | Grades per term, from the registry sheet (needs `--param studentTrainingTermDataId=<ID>`, the id comes from `averages`) |
+
+Three more entries in the same table are only used for logging in: `authenticate`, `refresh` and `outer_login`. The tool never calls Neptun's calendar export link regeneration endpoint, because it would break every calendar app subscribed to the old link.
+
+### Timetable
+
+`elte tanrend <QUERY> --term <TERM> [--mode code|subject|teacher]` searches the public ELTE timetable without a login. The term can be written `2026/27/1` or `2026-2027-1`. You get one row per timetable line, with the day, time, room, teacher and the weeks it runs. The timetable does not know how full a group is. Headcount and ranking exist only in Neptun.
+
+### Open course files
+
+| Command | What you get |
+| --- | --- |
+| `elte wornox ls [--match TEXT] [--root URL]` | Every file on the open course file server, walked five levels deep, optionally filtered by a substring of the path. |
+| `elte wornox pull <MATCH> --into <DIR>` | Downloads every file whose path contains the text. |
+| `elte webprog lectures` | The web programming lecture decks that answer, numbered, with their titles and a link that prints each one to PDF. This is the default. |
+| `elte webprog subjects` and `elte webprog materials` | The department site's subject list and materials list, with their links. |
+
+### Checks and plugins
+
+| Command | What you get |
+| --- | --- |
+| `elte sites [--only KEY ...]` | Whether each ELTE system in the profile answers, its status, and what kind of login it wants. |
+| `elte config check` | A check of your config and profile with no network call and no credential read. |
+| `elte provider <NAME> <ACTION> [--param KEY=VALUE]` | Calls a built-in or installed provider directly. The built-in Canvas provider answers `courses`, `files`, `assignments` and `upcoming`. `assignments` returns every assignment together with your submission, which has no `elte canvas` command of its own. |
+
 ## Configuration
 
 EltePortal reads `$env:ELTE_CONFIG` if set, otherwise `$env:XDG_CONFIG_HOME/elteportal/config.toml`, otherwise `~/.config/elteportal/config.toml` when present. An absent config uses the bundled ELTE profile and environment secrets. A minimal config looks like this:
